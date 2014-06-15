@@ -1,22 +1,21 @@
 package com.example.coolerbot.app;
 
-        import java.io.FileDescriptor;
-        import java.io.FileInputStream;
-        import java.io.FileOutputStream;
-        import java.io.IOException;
-
-        import android.app.Activity;
-        import android.app.PendingIntent;
-        import android.content.BroadcastReceiver;
-        import android.content.Context;
-        import android.content.Intent;
-        import android.content.IntentFilter;
-        import android.content.SharedPreferences;
-        import android.hardware.usb.UsbAccessory;
-        import android.hardware.usb.UsbManager;
-        import android.os.ParcelFileDescriptor;
-        import android.util.Log;
-        import android.widget.Toast;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbManager;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
+import android.widget.Toast;
 
 
 /******************************FT311 GPIO interface class******************************************/
@@ -233,7 +232,7 @@ public class FT311UARTInterface extends Activity
                 return 1;
             }
 
-            Toast.makeText(global_context, "Manufacturer, Model & Version are matched!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(global_context, "CoolerBot Found", Toast.LENGTH_SHORT).show();
             accessory_attached = true;
 
             if (usbmanager.hasPermission(accessory)) {

@@ -2,7 +2,6 @@ package com.example.coolerbot.app;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 public class SabertoothDriver{
 
@@ -22,19 +21,30 @@ public class SabertoothDriver{
     private static final byte RAMPING = 0x10;
     private static final byte DEADBAND = 0x11;
 
+    private static final int baudRate = 9600;
+    private static final byte dataBits = 0x08;
+    private static final byte stopBits = 0x01;
+    private static final byte parity = 0x00;
+    private static final byte flowControl = 0x00;
+
+
     private FT311UARTInterface uartInterface;
 
-    public SabertoothDriver(Context context, SharedPreferences sharedPreferences) {
+    public SabertoothDriver(Context context) {
         super();
 
-        int baudRate = 9600;
-        byte dataBits = 0x08;
-        byte stopBits = 0x01;
-        byte parity = 0x00;
-        byte flowControl = 0x00;
-
-        uartInterface = new FT311UARTInterface(context, sharedPreferences);
+        uartInterface = new FT311UARTInterface(context, null);
         uartInterface.SetConfig(baudRate, dataBits, stopBits, parity, flowControl);
+    }
+
+    public void resumeDriver() {
+        if (uartInterface.ResumeAccessory() == 2) {
+            uartInterface.SetConfig(baudRate, dataBits, stopBits, parity, flowControl);
+        }
+    }
+
+    public void destoryDriver() {
+        uartInterface.DestroyAccessory(true);
     }
 
     public void setMotorForwardA(byte command) {
