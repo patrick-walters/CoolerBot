@@ -42,7 +42,6 @@ public class FT311UARTInterface extends Activity
     private byte status;
     final int  maxnumbytes = 65536;
 
-    public boolean datareceived = false;
     public boolean READ_ENABLE = false;
     public boolean accessory_attached = false;
 
@@ -60,10 +59,8 @@ public class FT311UARTInterface extends Activity
         super();
         global_context = context;
         intsharePrefSettings = sharePrefSettings;
-		/*shall we start a thread here or what*/
         usbdata = new byte[1024];
         writeusbdata = new byte[256];
-		/*128(make it 256, but looks like bytes should be enough)*/
         readBuffer = new byte [maxnumbytes];
 
 
@@ -72,7 +69,6 @@ public class FT311UARTInterface extends Activity
         /***********************USB handling******************************************/
 
         usbmanager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        // Log.d("LED", "usbmanager" +usbmanager);
         mPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         filter.addAction(UsbManager.ACTION_USB_ACCESSORY_DETACHED);
@@ -171,9 +167,6 @@ public class FT311UARTInterface extends Activity
         {
             buffer[count] = readBuffer[readIndex];
             readIndex++;
-			/*shouldnt read more than what is there in the buffer,
-			 * 	so no need to check the overflow
-			 */
             readIndex %= maxnumbytes;
         }
         return status;
@@ -194,7 +187,6 @@ public class FT311UARTInterface extends Activity
     /*resume accessory*/
     public int ResumeAccessory()
     {
-        // Intent intent = getIntent();
         if (inputstream != null && outputstream != null) {
             return 1;
         }
@@ -206,8 +198,6 @@ public class FT311UARTInterface extends Activity
         }
         else
         {
-            // return 2 for accessory detached case
-            //Log.e(">>@@","ResumeAccessory RETURN 2 (accessories == null)");
             accessory_attached = false;
             return 2;
         }
@@ -325,7 +315,7 @@ public class FT311UARTInterface extends Activity
                 outputstream.close();
 
         }catch(IOException e){}
-		/*FIXME, add the notfication also to close the application*/
+		/*FIXME, add the notification also to close the application*/
 
         filedescriptor = null;
         inputstream = null;
@@ -385,7 +375,6 @@ public class FT311UARTInterface extends Activity
             {
                 saveDetachPreference();
                 DestroyAccessory(true);
-                //CloseAccessory();
             }else
             {
                 Log.d("LED", "....");
@@ -434,8 +423,6 @@ public class FT311UARTInterface extends Activity
                                 totalBytes = writeIndex-readIndex;
                             else
                                 totalBytes = (maxnumbytes-readIndex)+writeIndex;
-
-//					    		Log.e(">>@@","totalBytes:"+totalBytes);
                         }
                     }
                 }

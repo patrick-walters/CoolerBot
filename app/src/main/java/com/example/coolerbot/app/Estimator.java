@@ -5,25 +5,17 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.widget.Toast;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StateEstimator implements SensorEventListener, LocationListener{
+public class Estimator implements SensorEventListener {
 
+    private EstimatorEventListener estimatorEvent;
     private SensorManager sensorManager;
-    private LocationManager locationManager;
-
-    private HandlerThread handlerThread;
     private Handler sensorHandler;
-    private Context context;
 
     private float[] gyro = new float[3];
     private float[] gyroMatrix = new float[9];
@@ -34,47 +26,34 @@ public class StateEstimator implements SensorEventListener, LocationListener{
     private float[] fusedOrientation = new float[3];
     private float[] rotationMatrix = new float[9];
 
-    private float[] accel = new float[3];
-    private float accelSpeed;
-    private float gpsSpeed;
-    private float fusedSpeed;
-
     private float timeStampGyro;
-    private float timeStampAccel;
     private boolean initialized = false;
+    private boolean accelMagAvaiable = false;
 
     private static final int TIME_CONSTANT = 30;
     private static final float ORIENTATION_COEFF = 0.98f;
-    private final float SPEED_COEFF = 0.75f;
     private static final float NS2S = 1.0f / 1000000000.0f;
     private static final float EPSILON = 0.000000001f;
 
     private Timer filterTimer = new Timer();
 
-    public StateEstimator(Context context) {
-        this.context = context;
-        handlerThread = new HandlerThread("sensorThread");
+    public Estimator(Context context, EstimatorEventListener estimatorEvent) {
+
+        this.estimatorEvent = estimatorEvent;
+
+        HandlerThread handlerThread = new HandlerThread("sensorThread");
         handlerThread.start();
 
         sensorHandler = new Handler(handlerThread.getLooper());
 
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         registerListeners();
 
         filterTimer.scheduleAtFixedRate(new FuseTask(), 1000, TIME_CONSTANT);
     }
 
-    public float[] getOrientation() {
-        return fusedOrientation;
-    }
-
-    public float getSpeed() {
-        return fusedSpeed;
-    }
-
-    public float getGpsSpeed() { return gpsSpeed; }
+    public float[] getRawOrientation() {return accelMagOrientation;}
 
     public void registerListeners() {
         sensorManager.registerListener(this,
@@ -84,30 +63,16 @@ public class StateEstimator implements SensorEventListener, LocationListener{
                 sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
                 SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
         sensorManager.registerListener(this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-                SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
-        sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
                 SensorManager.SENSOR_DELAY_FASTEST, sensorHandler);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
 
     public void unregisterListeners() {
         sensorManager.unregisterListener(this);
-        locationManager.removeUpdates(this);
-    }
-
-    private void calcAccelSpeed(SensorEvent sensorEvent) {
-        if(timeStampAccel != 0) {
-            float dt = (sensorEvent.timestamp - timeStampAccel) * NS2S;
-            accelSpeed += (float) Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2]) * dt;
-        }
-
-        timeStampAccel = sensorEvent.timestamp;
     }
 
     private void calcGyroOrientation(SensorEvent sensorEvent) {
-        if(accelMagOrientation == null) return;
+        if(accelMagAvaiable == false) return;
 
         if(!initialized){
             gyroOrientation[0] = accelMagOrientation[0];
@@ -169,6 +134,7 @@ public class StateEstimator implements SensorEventListener, LocationListener{
     private void calcAccelMagOrientation() {
         if(SensorManager.getRotationMatrix(rotationMatrix, null, gravity, mag)) {
             SensorManager.getOrientation(rotationMatrix, accelMagOrientation);
+            accelMagAvaiable = true;
         }
     }
 
@@ -197,14 +163,9 @@ public class StateEstimator implements SensorEventListener, LocationListener{
         deltaRotationVector[3] = cosThetaOverTwo;
     }
 
-    private void updateSpeedFilter() {
-        float filterCoeffComp = 1.0f - SPEED_COEFF;
-
-        fusedSpeed = SPEED_COEFF * accelSpeed + filterCoeffComp * gpsSpeed;
-        accelSpeed = fusedSpeed;
-    }
-
     private void updateOrientationFilter() {
+        if(!initialized) return;
+
         float filterCoeffComp = 1.0f - ORIENTATION_COEFF;
 
         if (gyroOrientation[0] < -0.5 * Math.PI && accelMagOrientation[0] > 0.0) {
@@ -245,6 +206,8 @@ public class StateEstimator implements SensorEventListener, LocationListener{
 
         gyroMatrix = getRotationMatrixFromOrientation(fusedOrientation);
         System.arraycopy(fusedOrientation, 0, gyroOrientation, 0, 3);
+
+        estimatorEvent.onEstimatorUpdate(fusedOrientation);
     }
 
     private float[] matrixMultiplication(float[] A, float[] B) {
@@ -279,43 +242,16 @@ public class StateEstimator implements SensorEventListener, LocationListener{
                 System.arraycopy(sensorEvent.values, 0, mag, 0, 3);
                 calcAccelMagOrientation();
                 break;
-            case Sensor.TYPE_LINEAR_ACCELERATION:
-                System.arraycopy(sensorEvent.values, 0, accel, 0, 3);
-                calcAccelSpeed(sensorEvent);
-                break;
         }
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        gpsSpeed = location.getSpeed();
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        Toast.makeText(context, "Enabled provider " + provider, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Toast.makeText(context, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
-    }
+    public void onAccuracyChanged(Sensor sensor, int i) { }
 
     private class FuseTask extends TimerTask {
         @Override
         public void run() {
             updateOrientationFilter();
-            updateSpeedFilter();
         }
     }
 }

@@ -43,7 +43,7 @@ public class SabertoothDriver{
         }
     }
 
-    public void destoryDriver() {
+    public void destroyDriver() {
         uartInterface.DestroyAccessory(true);
     }
 
