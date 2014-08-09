@@ -4,19 +4,22 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MotionFragment extends Fragment implements View.OnClickListener,
+public class MotionFragment extends Fragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener,
         EstimatorEventListener, GuidanceEventListener, ControllerEventListener{
 
     private static final String ARG_SECTION_NUMBER = "section_number";
+
     private SabertoothDriver sabertoothDriver;
     private Estimator estimator;
     private Controller controller;
@@ -30,6 +33,9 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
 
     private Handler handler = new Handler();
     private Timer displayUpdate = new Timer();
+
+    private SeekBar speedSeekBar;
+    private SeekBar turnSeekBar;
 
     public static MotionFragment newInstance(int sectionNumber) {
         MotionFragment fragment = new MotionFragment();
@@ -56,16 +62,14 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.information_fragment, container, false);
 
-        Button forwardButton = (Button) rootView.findViewById(R.id.forwardButton);
-        forwardButton.setOnClickListener(this);
-        Button leftButton = (Button) rootView.findViewById(R.id.leftButton);
-        leftButton.setOnClickListener(this);
-        Button rightButton = (Button) rootView.findViewById(R.id.rightButton);
-        rightButton.setOnClickListener(this);
-        Button backwardButton = (Button) rootView.findViewById(R.id.backwardButton);
-        backwardButton.setOnClickListener(this);
         Button stopButton = (Button) rootView.findViewById(R.id.stopButton);
         stopButton.setOnClickListener(this);
+        Button centerButton = (Button) rootView.findViewById(R.id.centerButton);
+        centerButton.setOnClickListener(this);
+        speedSeekBar = (SeekBar) rootView.findViewById(R.id.speedSeekBar);
+        speedSeekBar.setOnSeekBarChangeListener(this);
+        turnSeekBar = (SeekBar) rootView.findViewById(R.id.turnSeekBar);
+        turnSeekBar.setOnSeekBarChangeListener(this);
 
         displayUpdate.scheduleAtFixedRate(new UpdateDisplayTask(), 1000, 50);
 
@@ -96,23 +100,39 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.forwardButton:
-                sabertoothDriver.setForwardMixed((byte)50);
-                break;
-            case R.id.leftButton:
-                sabertoothDriver.setLeftMixed((byte)30);
-                break;
-            case R.id.rightButton:
-                sabertoothDriver.setRightMixed((byte)30);
-                break;
-            case R.id.backwardButton:
-                sabertoothDriver.setBackwardMixed((byte)50);
+            case R.id.centerButton:
+                turnSeekBar.setProgress(65);
+                sabertoothDriver.setTurnMixed((byte) 65);
+                Log.d("Click","Center");
                 break;
             case R.id.stopButton:
+                speedSeekBar.setProgress(0);
                 sabertoothDriver.setForwardMixed((byte)0);
+                sabertoothDriver.setLeftMixed((byte)0);
+                Log.d("Click","Stop");
                 break;
         }
     }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        switch (seekBar.getId()) {
+            case R.id.speedSeekBar:
+                sabertoothDriver.setForwardMixed((byte) i);
+                Log.d("Seek","Speed");
+                break;
+            case R.id.turnSeekBar:
+                sabertoothDriver.setTurnMixed((byte) i);
+                Log.d("Seek","Turn");
+                break;
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {}
 
 
     @Override

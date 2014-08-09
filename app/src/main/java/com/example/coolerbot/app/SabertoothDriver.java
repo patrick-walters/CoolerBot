@@ -16,6 +16,7 @@ public class SabertoothDriver{
     private static final byte BACKWARD_MIXED = 0x09;
     private static final byte RIGHT_MIXED = 0x0A;
     private static final byte LEFT_MIXED = 0x0B;
+    private static final byte TURN = 0x0D;
     private static final byte SERIAL_TIMEOUT = 0x0E;
     private static final byte BAUD_RATE = 0x0F;
     private static final byte RAMPING = 0x10;
@@ -152,6 +153,17 @@ public class SabertoothDriver{
         message[1] = LEFT_MIXED;
         message[2] = command;
         int checkSum = ((int)ADDRESS & 0xFF) + (int)LEFT_MIXED + (int)command;
+        message[3] = (byte)(checkSum & 127);
+
+        uartInterface.SendData(4, message);
+    }
+
+    public void setTurnMixed(byte command) {
+        byte[] message = new byte[4];
+        message[0] = ADDRESS;
+        message[1] = TURN;
+        message[2] = command;
+        int checkSum = ((int)ADDRESS & 0xFF) + (int)TURN + (int)command;
         message[3] = (byte)(checkSum & 127);
 
         uartInterface.SendData(4, message);

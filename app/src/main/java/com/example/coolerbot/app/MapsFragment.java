@@ -5,9 +5,7 @@ import android.app.Fragment;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +14,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerDragListener {
@@ -26,6 +30,8 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     private MapView mapView;
     private GoogleMap mMap;
     private LocationManager locationManager;
+    private Polyline polyline;
+    private List<Marker> waypointList = new ArrayList<Marker>();
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -70,14 +76,15 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(),
                     lastKnownLocation.getLongitude());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 19));
+            waypointList.add(0,mMap.addMarker(new MarkerOptions()
+                    .position(lastKnownLatLng)
+                    .draggable(true)
+                    .title("Home")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))));
         }
 
-        LatLng latLng = new LatLng(29.646104,-82.349658);
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .draggable(true));
-
-        Log.d("Test","Cool");
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polyline = mMap.addPolyline(polylineOptions);
 
         return rootView;
     }
@@ -96,8 +103,22 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
 
     @Override
     public void onMapClick(LatLng latLng) {
-        Log.d("mapClick","Map Clicked");
-        mMap.addMarker(new MarkerOptions().position(latLng).draggable(true));
+        waypointList.add(mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .draggable(true)
+                .title("Waypoint")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))));
+
+        int numWaypoint = waypointList.size();
+        if (numWaypoint >= 2) {
+            List<LatLng> points = new ArrayList<LatLng>();
+
+            for (Marker marker: waypointList) {
+                points.add(marker.getPosition());
+            }
+            polyline.setPoints(points);
+        }
+
     }
 
 
@@ -108,7 +129,6 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     public void onMarkerDrag(Marker marker) {}
 
     @Override
-    public void onMarkerDragEnd(Marker marker) {
+    public void onMarkerDragEnd(Marker marker) {}
 
-    }
 }

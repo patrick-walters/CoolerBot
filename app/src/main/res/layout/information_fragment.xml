@@ -3,94 +3,116 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="20px"
     tools:context=".MainActivity$Information">
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Forward"
-        android:id="@+id/forwardButton"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Left"
-        android:id="@+id/leftButton"
-        android:layout_below="@+id/forwardButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Right"
-        android:id="@+id/rightButton"
-        android:layout_alignTop="@+id/leftButton"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Backward"
-        android:id="@+id/backwardButton"
-        android:layout_below="@+id/leftButton"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="STOP"
+        android:text="    STOP    "
         android:id="@+id/stopButton"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:background="@android:color/holo_red_dark"
+        android:layout_below="@+id/turnSeekBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="101dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Current Bearing:"
         android:id="@+id/bearing"
-        android:layout_marginTop="61dp"
+        android:layout_marginTop="47dp"
         android:layout_below="@+id/stopButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/turnSeekBar"
+        android:layout_alignStart="@+id/turnSeekBar" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Waypoint Bearing:"
         android:id="@+id/wpBearing"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/bearing"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/turnSeekBar" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="GPS Accruacy:"
         android:id="@+id/accruacy"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/wpBearing"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/turnSeekBar" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Effort:"
         android:id="@+id/effort"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/accruacy"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/turnSeekBar" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Distance"
         android:id="@+id/waypointDistance"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/effort"
+        android:layout_alignLeft="@+id/turnSeekBar" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speed:"
+        android:id="@+id/speed"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/speedSeekBar"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/speed"
+        android:layout_alignLeft="@+id/speed"
+        android:layout_alignStart="@+id/speed"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:max="127"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turn:"
+        android:id="@+id/turn"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/speedSeekBar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <SeekBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/turnSeekBar"
+        android:layout_below="@+id/turn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:layout_alignRight="@+id/speedSeekBar"
+        android:layout_alignEnd="@+id/speedSeekBar"
+        android:max="127"
+        android:progress="65"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="  Center  "
+        android:id="@+id/centerButton"
+        android:layout_below="@+id/turnSeekBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp" />
 
 </RelativeLayout>
