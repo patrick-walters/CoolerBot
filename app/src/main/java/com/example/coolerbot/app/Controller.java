@@ -1,11 +1,9 @@
 package com.example.coolerbot.app;
 
-import android.content.Context;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Controller implements EstimatorEventListener{
+public class Controller implements Estimator.EstimatorEventListener {
 
     private double control;
     private double kp;
@@ -23,10 +21,9 @@ public class Controller implements EstimatorEventListener{
 
     private static final int TIME_CONSTANT = 30;
 
-    public Controller(Context context, ControllerEventListener controllerEventListener) {
+    public Controller(ControllerEventListener controllerEventListener) {
         this.controllerEventListener = controllerEventListener;
 
-        Estimator estimator = new Estimator(context, this);
         Timer controllerTimer = new Timer();
 
         kp = 1;
@@ -99,4 +96,10 @@ public class Controller implements EstimatorEventListener{
             updateControl();
         }
     }
+
+    public interface ControllerEventListener {
+        public void onControllerUpdate(double effort);
+    }
 }
+
+

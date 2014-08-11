@@ -2,10 +2,9 @@ package com.example.coolerbot.app;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListener,
-        GoogleMap.OnMarkerDragListener {
+        GoogleMap.OnMarkerDragListener{
 
     private MapView mapView;
     private GoogleMap mMap;
-    private LocationManager locationManager;
     private Polyline polyline;
     private List<Marker> waypointList = new ArrayList<Marker>();
+    private Marker homeMarker;
+
+    private MapUpdateListener mapUpdateListener;
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -49,7 +50,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        locationManager = (LocationManager) activity.getSystemService(activity.LOCATION_SERVICE);
+        mapUpdateListener = (MapUpdateListener) activity;
     }
 
     @Override
@@ -68,20 +69,6 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
         mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
-
-        Criteria criteria = new Criteria();
-        String provider = locationManager.getBestProvider(criteria, true);
-        Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
-        if ( lastKnownLocation != null) {
-            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(),
-                    lastKnownLocation.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 19));
-            waypointList.add(0,mMap.addMarker(new MarkerOptions()
-                    .position(lastKnownLatLng)
-                    .draggable(true)
-                    .title("Home")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))));
-        }
 
         PolylineOptions polylineOptions = new PolylineOptions();
         polyline = mMap.addPolyline(polylineOptions);
@@ -109,6 +96,11 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
                 .title("Waypoint")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))));
 
+        Location location = new Location("Static");
+        location.setLatitude(latLng.latitude);
+        location.setLongitude(latLng.longitude);
+        mapUpdateListener.onWaypointUpdate(location);
+
         int numWaypoint = waypointList.size();
         if (numWaypoint >= 2) {
             List<LatLng> points = new ArrayList<LatLng>();
@@ -118,7 +110,6 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
             }
             polyline.setPoints(points);
         }
-
     }
 
 
@@ -131,4 +122,18 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onMarkerDragEnd(Marker marker) {}
 
+    public void setHomeLocation(Location home) {
+        Log.d("Test",home.toString());
+        LatLng homeLatLng = new LatLng(home.getLatitude(),home.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, 19));
+        this.homeMarker = mMap.addMarker(new MarkerOptions()
+                .position(homeLatLng)
+                .draggable(true)
+                .title("Home")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+    }
+
+    public interface MapUpdateListener {
+        public void onWaypointUpdate(Location waypoint);
+    }
 }

@@ -7,11 +7,18 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Guidance implements LocationListener{
 
     private Context context;
 
-    private Location[] waypoints;
+    private MotionUpdateListener motionUpdateListener;
+
+    private List<Location> waypoints = new ArrayList<Location>(2);
     private Location home;
     private int index;
 
@@ -19,8 +26,8 @@ public class Guidance implements LocationListener{
 
     private double x_current;
     private double y_current;
-    private double[] x_waypoints;
-    private double[] y_waypoints;
+    private List<Double> x_waypoints = new ArrayList<Double>(2);
+    private List<Double> y_waypoints = new ArrayList<Double>(2);
 
     private double x_los;
     private double y_los;
@@ -30,54 +37,39 @@ public class Guidance implements LocationListener{
     private double waypointDistance;
 
     private double switchDistance;
-    private int maxIndex;
     private int state;
+
+    private LatLng losLatLng;
 
     private double psi_last;
 
     private LocationManager locationManager;
     private GuidanceEventListener guidanceEventListener;
 
-    public Guidance(Context context, GuidanceEventListener guidanceEventListener) {
+    public Guidance(Context context, GuidanceEventListener guidanceEventListener,
+                    MotionUpdateListener motionUpdateListener) {
         this.context = context;
         this.guidanceEventListener = guidanceEventListener;
+        this.motionUpdateListener = motionUpdateListener;
 
-        home = new Location("Code");
-        home.setLatitude(29.646104);
-        home.setLongitude(-82.349658);
-        Location waypoint1 = new Location("Code");
-        waypoint1.setLatitude(29.646104);
-        waypoint1.setLongitude(-82.349658);
-        Location waypoint2 = new Location("Code");
-        waypoint2.setLatitude(29.646098);
-        waypoint2.setLongitude(-82.349877);
-        Location waypoint3 = new Location("Code");
-        waypoint3.setLatitude(29.646297);
-        waypoint3.setLongitude(-82.349884);
-        waypoints = new Location[3];
-        waypoints[0] = waypoint1;
-        waypoints[1] = waypoint2;
-        waypoints[2] = waypoint3;
         switchDistance = 2;
-
         horizon = 2;
-
-        maxIndex = waypoints.length;
-        x_waypoints = new double[maxIndex];
-        y_waypoints = new double[maxIndex];
-
-        int i = 0;
-
-        for (Location waypoint : waypoints) {
-            float bearing = home.bearingTo(waypoint);
-            float distance = home.distanceTo(waypoint);
-            x_waypoints[i] = - distance*Math.sin(bearing * Math.PI / 180);
-            y_waypoints[i] = distance*Math.cos(bearing * Math.PI / 180);
-            i++;
-        }
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         guidanceStart();
+    }
+
+    public void addWaypoint(Location waypoint) {
+        waypoints.add(waypoint);
+
+        float bearing = home.bearingTo(waypoint);
+        float distance = home.distanceTo(waypoint);
+        x_waypoints.add(-distance*Math.sin(bearing * Math.PI / 180));
+        y_waypoints.add(distance*Math.cos(bearing * Math.PI / 180));
+    }
+
+    public Location getHome() {
+        return home;
     }
 
     public void guidanceStart() {
@@ -96,9 +88,8 @@ public class Guidance implements LocationListener{
     }
 
     private void calcLOSPosition () {
-
-        double delta_x = x_waypoints[index] - x_waypoints[index-1];
-        double delta_y = y_waypoints[index] - y_waypoints[index-1];
+        double delta_x = x_waypoints.get(index) - x_waypoints.get(index-1);
+        double delta_y = y_waypoints.get(index) - y_waypoints.get(index-1);
 
         double norm = Math.sqrt(delta_x * delta_x + delta_y * delta_y);
 
@@ -106,13 +97,13 @@ public class Guidance implements LocationListener{
         double y_unit = delta_y / norm;
 
         if (delta_x == 0) {
-            x_los = x_waypoints[index-1];
+            x_los = x_waypoints.get(index-1);
             if (delta_y > 0) y_los = y_current + horizon;
             else y_los = y_current - horizon;
         }
         else {
             double a = delta_y/delta_x;
-            double c = y_waypoints[index-1] - a * x_waypoints[index-1];
+            double c = y_waypoints.get(index-1) - a * x_waypoints.get(index-1);
 
             double x_nearest = ((x_current - a * y_current) - a*c) / (a*a + 1);
             double y_nearest = (a * (-x_current + a * y_current) - c) / (a*a + 1);
@@ -120,17 +111,18 @@ public class Guidance implements LocationListener{
             x_los = x_nearest + x_unit;
             y_los = y_nearest + y_unit;
         }
+
     }
 
     private void waypointSwitch() {
-        double distance  = Math.sqrt(Math.pow(x_waypoints[index] - x_current, 2)
-                + Math.pow(y_waypoints[index] - y_current, 2));
+        double distance  = Math.sqrt(Math.pow(x_waypoints.get(index) - x_current, 2)
+                + Math.pow(y_waypoints.get(index) - y_current, 2));
 
         waypointDistance = distance;
 
         if (distance <= switchDistance) {
             index ++;
-            if (index >= maxIndex) { index = -1; }
+            if (index >= waypoints.size()) { index = -1; }
         }
     }
 
@@ -198,6 +190,11 @@ public class Guidance implements LocationListener{
 
     @Override
     public void onLocationChanged(Location location) {
+        if(home == null && location != null) {
+            home = location;
+            motionUpdateListener.onHomeUpdate(location);
+        }
+        if(waypoints.size() < 2) {return;}
         float bearing = home.bearingTo(location);
         float distance = home.distanceTo(location);
         x_current = distance * Math.cos(bearing * Math.PI / 180);
@@ -223,5 +220,13 @@ public class Guidance implements LocationListener{
     @Override
     public void onProviderDisabled(String provider) {
         Toast.makeText(context, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
+    }
+
+    public interface GuidanceEventListener {
+        public void onGuidanceUpdate(double desiredBearing, double accuracy);
+    }
+
+    public interface MotionUpdateListener {
+        public void onHomeUpdate(Location home);
     }
 }

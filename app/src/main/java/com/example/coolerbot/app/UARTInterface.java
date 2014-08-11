@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 
 /******************************FT311 GPIO interface class******************************************/
-public class FT311UARTInterface extends Activity
+public class UARTInterface extends Activity
 {
 
     private static final String ACTION_USB_PERMISSION = "com.CoolerBot.USB_PERMISSION";
@@ -55,7 +55,7 @@ public class FT311UARTInterface extends Activity
     public SharedPreferences intsharePrefSettings;
 
     /*constructor*/
-    public FT311UARTInterface(Context context, SharedPreferences sharePrefSettings){
+    public UARTInterface(Context context, SharedPreferences sharePrefSettings){
         super();
         global_context = context;
         intsharePrefSettings = sharePrefSettings;

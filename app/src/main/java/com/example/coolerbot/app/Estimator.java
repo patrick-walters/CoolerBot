@@ -254,4 +254,8 @@ public class Estimator implements SensorEventListener {
             updateOrientationFilter();
         }
     }
+
+    public interface EstimatorEventListener {
+        public void onEstimatorUpdate(float[] fusedData);
+    }
 }

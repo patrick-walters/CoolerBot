@@ -29,12 +29,12 @@ public class SabertoothDriver{
     private static final byte flowControl = 0x00;
 
 
-    private FT311UARTInterface uartInterface;
+    private UARTInterface uartInterface;
 
     public SabertoothDriver(Context context) {
         super();
 
-        uartInterface = new FT311UARTInterface(context, null);
+        uartInterface = new UARTInterface(context, null);
         uartInterface.SetConfig(baudRate, dataBits, stopBits, parity, flowControl);
     }
 

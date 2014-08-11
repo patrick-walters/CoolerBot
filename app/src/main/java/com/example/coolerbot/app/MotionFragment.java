@@ -2,6 +2,8 @@ package com.example.coolerbot.app;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -15,8 +17,9 @@ import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MotionFragment extends Fragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener,
-        EstimatorEventListener, GuidanceEventListener, ControllerEventListener{
+public class MotionFragment extends Fragment implements View.OnClickListener,
+        SeekBar.OnSeekBarChangeListener,Estimator.EstimatorEventListener,
+        Guidance.GuidanceEventListener, Controller.ControllerEventListener {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -36,6 +39,12 @@ public class MotionFragment extends Fragment implements View.OnClickListener, Se
 
     private SeekBar speedSeekBar;
     private SeekBar turnSeekBar;
+    private Button stopSelectButton;
+    private Button modeSelectButton;
+
+    private boolean isManual = true;
+    private boolean isStop = true;
+
 
     public static MotionFragment newInstance(int sectionNumber) {
         MotionFragment fragment = new MotionFragment();
@@ -53,8 +62,8 @@ public class MotionFragment extends Fragment implements View.OnClickListener, Se
         super.onAttach(activity);
         sabertoothDriver = new SabertoothDriver(activity);
         estimator = new Estimator(activity, this);
-        controller = new Controller(activity, this);
-        guidance = new Guidance(activity, this);
+        controller = new Controller(this);
+        guidance = new Guidance(activity, this, (Guidance.MotionUpdateListener) activity);
     }
 
     @Override
@@ -62,10 +71,10 @@ public class MotionFragment extends Fragment implements View.OnClickListener, Se
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.information_fragment, container, false);
 
-        Button stopButton = (Button) rootView.findViewById(R.id.stopButton);
-        stopButton.setOnClickListener(this);
-        Button centerButton = (Button) rootView.findViewById(R.id.centerButton);
-        centerButton.setOnClickListener(this);
+        stopSelectButton = (Button) rootView.findViewById(R.id.stopSelectButton);
+        stopSelectButton.setOnClickListener(this);
+        modeSelectButton = (Button) rootView.findViewById(R.id.modeSelectButton);
+        modeSelectButton.setOnClickListener(this);
         speedSeekBar = (SeekBar) rootView.findViewById(R.id.speedSeekBar);
         speedSeekBar.setOnSeekBarChangeListener(this);
         turnSeekBar = (SeekBar) rootView.findViewById(R.id.turnSeekBar);
@@ -100,16 +109,39 @@ public class MotionFragment extends Fragment implements View.OnClickListener, Se
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.centerButton:
-                turnSeekBar.setProgress(65);
-                sabertoothDriver.setTurnMixed((byte) 65);
-                Log.d("Click","Center");
-                break;
-            case R.id.stopButton:
+            case R.id.modeSelectButton:
+                if(isManual) {
+                    modeSelectButton.setText("Automatic");
+                    speedSeekBar.setEnabled(false);
+                    turnSeekBar.setEnabled(false);
+                    guidance.guidanceResume();
+                    isManual = false;
+                    break;
+                }
+                guidance.guidancePause();
+                speedSeekBar.setEnabled(true);
+                turnSeekBar.setEnabled(true);
+                modeSelectButton.setText("Manual");
                 speedSeekBar.setProgress(0);
                 sabertoothDriver.setForwardMixed((byte)0);
-                sabertoothDriver.setLeftMixed((byte)0);
-                Log.d("Click","Stop");
+                turnSeekBar.setProgress(65);
+                sabertoothDriver.setTurnMixed((byte)65);
+                isManual = true;
+                break;
+            case R.id.stopSelectButton:
+                if(isStop) {
+                    stopSelectButton.setText("Stop");
+                    stopSelectButton.setBackgroundColor(0xffcc0000);
+                    isStop = false;
+                    break;
+                }
+                stopSelectButton.setText("Start");
+                stopSelectButton.setBackgroundColor(0xff669900);
+                speedSeekBar.setProgress(0);
+                sabertoothDriver.setForwardMixed((byte) 0);
+                turnSeekBar.setProgress(65);
+                sabertoothDriver.setTurnMixed((byte)65);
+                isStop = true;
                 break;
         }
     }
@@ -160,6 +192,10 @@ public class MotionFragment extends Fragment implements View.OnClickListener, Se
         }
     }
 
+    public void addWaypoint(Location waypoint) {
+        guidance.addWaypoint(waypoint);
+    }
+
     private Runnable updateDisplay = new Runnable() {
         public void run() {
             if ( getView() != null ) {
@@ -174,7 +210,6 @@ public class MotionFragment extends Fragment implements View.OnClickListener, Se
                 TextView waypoint = (TextView) getView().findViewById(R.id.waypointDistance);
                 waypoint.setText("Distance: " + (float) waypointDistance);
             }
-
         }
     };
 }

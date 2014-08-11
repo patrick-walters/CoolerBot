@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.location.Location;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -12,13 +13,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
+import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends Activity implements ActionBar.TabListener {
+public class MainActivity extends Activity implements ActionBar.TabListener,
+        Guidance.MotionUpdateListener, MapsFragment.MapUpdateListener{
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     public static FragmentManager fragmentManager;
+
+    private MapsFragment mapFragmentInstance;
+    private MotionFragment motionFragmentInstance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +104,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
+    @Override
+    public void onHomeUpdate(Location home) {
+        mapFragmentInstance.setHomeLocation(home);
+    }
+
+    @Override
+    public void onWaypointUpdate(Location waypoint) {
+        motionFragmentInstance.addWaypoint(waypoint);
+    }
+
     //Returns a fragment corresponding to one of the sections/tabs/pages.
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -109,9 +125,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             // Return a Fragment (defined as a static inner class below).
             switch (position) {
                 case 0:
-                    return MapsFragment.newInstance(position + 1);
+                    mapFragmentInstance = MapsFragment.newInstance(position + 1);
+                    return mapFragmentInstance;
                 case 1:
-                    return MotionFragment.newInstance(position + 1);
+                    motionFragmentInstance = MotionFragment.newInstance(position + 1);
+                    return motionFragmentInstance;
             }
             return null;
         }
