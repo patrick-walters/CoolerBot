@@ -9,9 +9,12 @@ import android.location.Location;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 import java.util.Locale;
@@ -68,6 +71,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+
+
     }
 
     @Override
@@ -105,12 +110,15 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
     }
 
     @Override
-    public void onHomeUpdate(Location home) {
+    public void onHomeUpdate(LatLng home) {
         mapFragmentInstance.setHomeLocation(home);
     }
 
     @Override
-    public void onWaypointUpdate(Location waypoint) {
+    public void onLOSUpdate(LatLng los) { mapFragmentInstance.setLOSLoction(los); }
+
+    @Override
+    public void onWaypointUpdate(LatLng waypoint) {
         motionFragmentInstance.addWaypoint(waypoint);
     }
 

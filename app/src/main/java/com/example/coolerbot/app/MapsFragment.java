@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListener,
@@ -31,6 +32,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     private Polyline polyline;
     private List<Marker> waypointList = new ArrayList<Marker>();
     private Marker homeMarker;
+    private Marker losMarker;
 
     private MapUpdateListener mapUpdateListener;
 
@@ -83,6 +85,12 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     }
 
     @Override
+    public void onPause() {
+        mapView.onPause();
+        super.onPause();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         mapView.onDestroy();
@@ -90,16 +98,14 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
 
     @Override
     public void onMapClick(LatLng latLng) {
+        if(homeMarker == null) {return;}
         waypointList.add(mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .draggable(true)
                 .title("Waypoint")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))));
 
-        Location location = new Location("Static");
-        location.setLatitude(latLng.latitude);
-        location.setLongitude(latLng.longitude);
-        mapUpdateListener.onWaypointUpdate(location);
+        mapUpdateListener.onWaypointUpdate(latLng);
 
         int numWaypoint = waypointList.size();
         if (numWaypoint >= 2) {
@@ -112,7 +118,6 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
         }
     }
 
-
     @Override
     public void onMarkerDragStart(Marker marker) {}
 
@@ -122,18 +127,25 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onMarkerDragEnd(Marker marker) {}
 
-    public void setHomeLocation(Location home) {
-        Log.d("Test",home.toString());
-        LatLng homeLatLng = new LatLng(home.getLatitude(),home.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLatLng, 19));
-        this.homeMarker = mMap.addMarker(new MarkerOptions()
-                .position(homeLatLng)
+    public void setHomeLocation(LatLng home) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, 19));
+        homeMarker = mMap.addMarker(new MarkerOptions()
+                .position(home)
                 .draggable(true)
                 .title("Home")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
     }
 
+    public void setLOSLoction(LatLng los) {
+        if(losMarker != null) {losMarker.remove();}
+        losMarker = mMap.addMarker(new MarkerOptions()
+                .position(los)
+                .draggable(true)
+                .title("LOS")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+    }
+
     public interface MapUpdateListener {
-        public void onWaypointUpdate(Location waypoint);
+        public void onWaypointUpdate(LatLng waypoint);
     }
 }

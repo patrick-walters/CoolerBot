@@ -18,11 +18,9 @@ public class Guidance implements LocationListener{
 
     private MotionUpdateListener motionUpdateListener;
 
-    private List<Location> waypoints = new ArrayList<Location>(2);
-    private Location home;
+    private List<LatLng> waypoints = new ArrayList<LatLng>(2);
+    private LatLng home;
     private int index;
-
-    private static final int TIME_CONSTANT = 250;
 
     private double x_current;
     private double y_current;
@@ -39,8 +37,6 @@ public class Guidance implements LocationListener{
     private double switchDistance;
     private int state;
 
-    private LatLng losLatLng;
-
     private double psi_last;
 
     private LocationManager locationManager;
@@ -52,25 +48,22 @@ public class Guidance implements LocationListener{
         this.guidanceEventListener = guidanceEventListener;
         this.motionUpdateListener = motionUpdateListener;
 
-        switchDistance = 2;
-        horizon = 2;
+        switchDistance = 5;
+        horizon = 3;
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         guidanceStart();
     }
 
-    public void addWaypoint(Location waypoint) {
+    public void addWaypoint(LatLng waypoint) {
         waypoints.add(waypoint);
 
-        float bearing = home.bearingTo(waypoint);
-        float distance = home.distanceTo(waypoint);
-        x_waypoints.add(-distance*Math.sin(bearing * Math.PI / 180));
-        y_waypoints.add(distance*Math.cos(bearing * Math.PI / 180));
+        double[] coordinate = LatLngHelper.ll2ltp(home,waypoint);
+        x_waypoints.add(coordinate[1]);
+        y_waypoints.add(coordinate[0]);
     }
 
-    public Location getHome() {
-        return home;
-    }
+    public double getWaypointDistance() { return waypointDistance; }
 
     public void guidanceStart() {
         index = 1;
@@ -91,7 +84,7 @@ public class Guidance implements LocationListener{
         double delta_x = x_waypoints.get(index) - x_waypoints.get(index-1);
         double delta_y = y_waypoints.get(index) - y_waypoints.get(index-1);
 
-        double norm = Math.sqrt(delta_x * delta_x + delta_y * delta_y);
+        double norm = Math.sqrt(Math.pow(delta_x,2) + Math.pow(delta_y,2));
 
         double x_unit = delta_x / norm;
         double y_unit = delta_y / norm;
@@ -105,12 +98,14 @@ public class Guidance implements LocationListener{
             double a = delta_y/delta_x;
             double c = y_waypoints.get(index-1) - a * x_waypoints.get(index-1);
 
-            double x_nearest = ((x_current - a * y_current) - a*c) / (a*a + 1);
-            double y_nearest = (a * (-x_current + a * y_current) - c) / (a*a + 1);
+            double x_nearest = (-(-x_current - a * y_current) - a*c) / (Math.pow(a,2) + 1);
+            double y_nearest = (a * (x_current + a * y_current) + c) / (Math.pow(a,2) + 1);
 
-            x_los = x_nearest + x_unit;
-            y_los = y_nearest + y_unit;
+            x_los = x_nearest + horizon*x_unit;
+            y_los = y_nearest + horizon*y_unit;
         }
+
+        motionUpdateListener.onLOSUpdate(LatLngHelper.ltp2lla(home,new double[]{y_los,x_los,0}));
 
     }
 
@@ -191,21 +186,19 @@ public class Guidance implements LocationListener{
     @Override
     public void onLocationChanged(Location location) {
         if(home == null && location != null) {
-            home = location;
-            motionUpdateListener.onHomeUpdate(location);
+            home = new LatLng(location.getLatitude(),location.getLongitude());
+            motionUpdateListener.onHomeUpdate(home);
         }
         if(waypoints.size() < 2) {return;}
-        float bearing = home.bearingTo(location);
-        float distance = home.distanceTo(location);
-        x_current = distance * Math.cos(bearing * Math.PI / 180);
-        y_current = distance * Math.sin(bearing * Math.PI / 180);
+        double[] current_coordinate = LatLngHelper.ll2ltp(home,
+                new LatLng(location.getLatitude(),location.getLongitude()));
+        x_current = current_coordinate[1];
+        y_current = current_coordinate[0];
 
         calcDesiredBearing();
 
         guidanceEventListener.onGuidanceUpdate(desiredBearing, location.getAccuracy());
     }
-
-    public double getWaypointDistance() { return waypointDistance; }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -227,6 +220,7 @@ public class Guidance implements LocationListener{
     }
 
     public interface MotionUpdateListener {
-        public void onHomeUpdate(Location home);
+        public void onHomeUpdate(LatLng home);
+        public void onLOSUpdate(LatLng los);
     }
 }

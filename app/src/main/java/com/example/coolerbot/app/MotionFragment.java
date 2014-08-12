@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -175,6 +177,7 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onEstimatorUpdate(float[] fusedData) {
         orientation = fusedData;
+        controller.setActual(fusedData[0]);
     }
 
     @Override
@@ -192,7 +195,7 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-    public void addWaypoint(Location waypoint) {
+    public void addWaypoint(LatLng waypoint) {
         guidance.addWaypoint(waypoint);
     }
 

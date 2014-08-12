@@ -3,9 +3,8 @@ package com.example.coolerbot.app;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Controller implements Estimator.EstimatorEventListener {
+public class Controller{
 
-    private double control;
     private double kp;
     private double ki;
     private double kd;
@@ -26,7 +25,7 @@ public class Controller implements Estimator.EstimatorEventListener {
 
         Timer controllerTimer = new Timer();
 
-        kp = 1;
+        kp = 0.25;
         ki = 0;
         kd = 0;
 
@@ -45,6 +44,8 @@ public class Controller implements Estimator.EstimatorEventListener {
     public void setDesired(double desired) {
         desiredSetpoint = desired;
     }
+
+    public void setActual(double actual) { this.actual = actual; }
 
     private double remapAngle(double angle) {
         double n;
@@ -85,10 +86,10 @@ public class Controller implements Estimator.EstimatorEventListener {
         controllerEventListener.onControllerUpdate(Math.toDegrees(kp*error + integral));
     }
 
-    @Override
-    public void onEstimatorUpdate(float[] fusedData) {
-        actual = fusedData[0];
-    }
+    //@Override
+    //public void onEstimatorUpdate(float[] fusedData) {
+    //    actual = fusedData[0];
+    //}
 
     private class ControlTask extends TimerTask {
         @Override
