@@ -68,17 +68,18 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
         mapView = (MapView) rootView.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
 
-        //Initialize map
+        //Initialize map required by maps
         if (mapView == null) { return null; }
         MapsInitializer.initialize(getActivity());
 
-        //Set
+        //Setup map options
         mMap = mapView.getMap();
         mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+        //Instantiate ployline to draw lines between waypoints
         PolylineOptions polylineOptions = new PolylineOptions();
         polyline = mMap.addPolyline(polylineOptions);
 
@@ -105,7 +106,10 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
 
     @Override
     public void onMapClick(LatLng latLng) {
+        //Do not allow map clicks until home location is set. Home location is set when first GPS
+        // fix is made.
         if(homeMarker == null) {return;}
+        //
         waypointList.add(mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .draggable(true)
