@@ -1,5 +1,7 @@
 package com.example.coolerbot.app;
 
+import android.util.Log;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,7 +27,7 @@ public class Controller{
 
         Timer controllerTimer = new Timer();
 
-        kp = 0.25;
+        kp = 1;
         ki = 0;
         kd = 0;
 
@@ -39,6 +41,7 @@ public class Controller{
         this.kp = kp;
         this.ki = ki;
         this.kd = kd;
+        Log.d("kp",Double.toString(kp));
     }
 
     public void setDesired(double desired) {

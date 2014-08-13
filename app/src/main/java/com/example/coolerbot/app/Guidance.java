@@ -49,7 +49,7 @@ public class Guidance implements LocationListener{
         this.motionUpdateListener = motionUpdateListener;
 
         switchDistance = 5;
-        horizon = 3;
+        horizon = 5;
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         guidanceStart();

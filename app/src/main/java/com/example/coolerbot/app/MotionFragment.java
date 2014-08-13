@@ -7,10 +7,13 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -20,8 +23,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MotionFragment extends Fragment implements View.OnClickListener,
-        SeekBar.OnSeekBarChangeListener,Estimator.EstimatorEventListener,
-        Guidance.GuidanceEventListener, Controller.ControllerEventListener {
+        SeekBar.OnSeekBarChangeListener, EditText.OnEditorActionListener,
+        Estimator.EstimatorEventListener, Guidance.GuidanceEventListener,
+        Controller.ControllerEventListener {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -35,6 +39,7 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
     private double gpsAccuracy;
     private double effort;
     private double waypointDistance;
+    private byte speed = 90;
 
     private Handler handler = new Handler();
     private Timer displayUpdate = new Timer();
@@ -81,6 +86,10 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
         speedSeekBar.setOnSeekBarChangeListener(this);
         turnSeekBar = (SeekBar) rootView.findViewById(R.id.turnSeekBar);
         turnSeekBar.setOnSeekBarChangeListener(this);
+        EditText setSpeed = (EditText) rootView.findViewById(R.id.setSpeed);
+        setSpeed.setOnEditorActionListener(this);
+        EditText setGain = (EditText) rootView.findViewById(R.id.setGain);
+        setGain.setOnEditorActionListener(this);
 
         displayUpdate.scheduleAtFixedRate(new UpdateDisplayTask(), 1000, 50);
 
@@ -117,6 +126,7 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
                     speedSeekBar.setEnabled(false);
                     turnSeekBar.setEnabled(false);
                     guidance.guidanceResume();
+                    sabertoothDriver.setForwardMixed(speed);
                     isManual = false;
                     break;
                 }
@@ -172,6 +182,19 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onControllerUpdate(double effort) {
         this.effort = effort;
+        if (effort <= 0) {
+            effort = Math.abs(effort);
+            if (effort >= 127) {
+                effort = 127;
+            }
+            sabertoothDriver.setLeftMixed((byte) Math.round(effort));
+        }
+        else {
+            if (effort >= 127) {
+                effort = 127;
+            }
+            sabertoothDriver.setRightMixed((byte) Math.round(effort));
+        }
     }
 
     @Override
@@ -186,6 +209,23 @@ public class MotionFragment extends Fragment implements View.OnClickListener,
         this.gpsAccuracy = gpsAccuracy;
         controller.setDesired(desiredBearing);
         waypointDistance = guidance.getWaypointDistance();
+    }
+
+    @Override
+    public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+        boolean handled = false;
+        if (actionId == EditorInfo.IME_ACTION_SEND) {
+            switch (textView.getId()) {
+                case R.id.setGain:
+                    controller.setGains(Integer.parseInt(textView.getText().toString()), 0, 0);
+                    break;
+                case R.id.setSpeed:
+                    speed = (byte) Integer.parseInt(textView.getText().toString());
+                    break;
+            }
+            handled = true;
+        }
+        return handled;
     }
 
     private class UpdateDisplayTask extends TimerTask {
