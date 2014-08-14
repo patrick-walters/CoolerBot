@@ -107,17 +107,19 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onMapClick(LatLng latLng) {
         //Do not allow map clicks until home location is set. Home location is set when first GPS
-        // fix is made.
+        //fix is made.
         if(homeMarker == null) {return;}
-        //
+        //Add marker for each map click. Waypoint to follow.
         waypointList.add(mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .draggable(true)
                 .title("Waypoint")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))));
-
+        //Send waypoint back up to parent activity
         mapUpdateListener.onWaypointUpdate(latLng);
 
+        //Iterate through stored waypoint lists, and create points list for polyline to connect
+        //waypoint with line.
         int numWaypoint = waypointList.size();
         if (numWaypoint >= 2) {
             List<LatLng> points = new ArrayList<LatLng>();
@@ -125,6 +127,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
             for (Marker marker: waypointList) {
                 points.add(marker.getPosition());
             }
+            //Create lines
             polyline.setPoints(points);
         }
     }
@@ -138,8 +141,12 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onMarkerDragEnd(Marker marker) {}
 
+    //Sets home location. This function is called from parent activity. Cannot add waypoint until
+    //home is set.
     public void setHomeLocation(LatLng home) {
+        //Auto zoom into home location.
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, 19));
+        //Add marker for home location.
         homeMarker = mMap.addMarker(new MarkerOptions()
                 .position(home)
                 .draggable(true)
@@ -147,6 +154,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
     }
 
+    //Set LOS marker for debugging. Function is called for parent activity.
     public void setLOSLoction(LatLng los) {
         if(losMarker != null) {losMarker.remove();}
         losMarker = mMap.addMarker(new MarkerOptions()
@@ -156,6 +164,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
     }
 
+    //Interface class for map update callback.
     public interface MapUpdateListener {
         public void onWaypointUpdate(LatLng waypoint);
     }
