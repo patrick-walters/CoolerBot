@@ -38,8 +38,8 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
+    //Create new instance for fragment.
     public static MapsFragment newInstance(int sectionNumber) {
-        //Create new instance for fragment.
         MapsFragment fragment = new MapsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -53,7 +53,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        //Resister map update listener to pass data back to parent activity
+        //Register map update listener to pass data back to parent activity
         mapUpdateListener = (MapUpdateListener) activity;
     }
 
@@ -61,7 +61,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if (container == null) { return null; }
-        //Attach map layout
+        //Inflate map layout
         View rootView = inflater.inflate(R.layout.map_fragment, container, false);
 
         //Add google map to map layout
@@ -79,7 +79,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
         mMap.setOnMarkerDragListener(this);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
-        //Instantiate ployline to draw lines between waypoints
+        //Instantiate polyline to draw lines between waypoints
         PolylineOptions polylineOptions = new PolylineOptions();
         polyline = mMap.addPolyline(polylineOptions);
 
