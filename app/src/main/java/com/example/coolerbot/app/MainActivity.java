@@ -5,29 +5,28 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.location.Location;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends Activity implements ActionBar.TabListener,
-        Guidance.MotionUpdateListener, MapsFragment.MapUpdateListener{
+        MotionControl.MotionControlEventListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     public static FragmentManager fragmentManager;
 
     private MapsFragment mapFragmentInstance;
-    private MotionFragment motionFragmentInstance;
+    private InformationFragment informationFragmentInstance;
+
+    public MotionControl motionControl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +35,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
         // Keep the screen on.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        //Instantiate motion control class
+        motionControl = new MotionControl(this);
 
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
@@ -71,8 +73,24 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        motionControl.onResume();
+    }
 
+    @Override
+    public void onPause() {
+        motionControl.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        motionControl.onDestroy();
+        super.onDestroy();
     }
 
     @Override
@@ -109,19 +127,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
-    @Override
-    public void onHomeUpdate(LatLng home) {
-        mapFragmentInstance.setHomeLocation(home);
-    }
-
-    @Override
-    public void onLOSUpdate(LatLng los) { mapFragmentInstance.setLOSLoction(los); }
-
-    @Override
-    public void onWaypointUpdate(LatLng waypoint) {
-        motionFragmentInstance.addWaypoint(waypoint);
-    }
-
     //Returns a fragment corresponding to one of the sections/tabs/pages.
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -136,8 +141,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
                     mapFragmentInstance = MapsFragment.newInstance(position + 1);
                     return mapFragmentInstance;
                 case 1:
-                    motionFragmentInstance = MotionFragment.newInstance(position + 1);
-                    return motionFragmentInstance;
+                    informationFragmentInstance = InformationFragment.newInstance(position + 1);
+                    return informationFragmentInstance;
             }
             return null;
         }
@@ -161,22 +166,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    public void onHomeWaypointUpdate(LatLng home) {
+        mapFragmentInstance.setHomeLocation(home);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void  onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onLOSWaypointUpdate(LatLng los) {
+        mapFragmentInstance.setLOSLoction(los);
     }
 }

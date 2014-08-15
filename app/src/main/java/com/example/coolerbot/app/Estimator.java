@@ -53,7 +53,9 @@ public class Estimator implements SensorEventListener {
         filterTimer.scheduleAtFixedRate(new FuseTask(), 1000, TIME_CONSTANT);
     }
 
-    public float[] getRawOrientation() {return accelMagOrientation;}
+    public float getActualBearing() {
+        return fusedOrientation[0];
+    }
 
     public void registerListeners() {
         sensorManager.registerListener(this,

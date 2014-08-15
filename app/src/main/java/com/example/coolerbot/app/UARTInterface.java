@@ -222,7 +222,7 @@ public class UARTInterface extends Activity
                 return 1;
             }
 
-            Toast.makeText(global_context, "CoolerBot Found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(global_context, "Accessory Found", Toast.LENGTH_SHORT).show();
             accessory_attached = true;
 
             if (usbmanager.hasPermission(accessory)) {
@@ -315,7 +315,8 @@ public class UARTInterface extends Activity
                 outputstream.close();
 
         }catch(IOException e){}
-		/*FIXME, add the notification also to close the application*/
+
+		Toast.makeText(global_context,"Accessory Disconnected",Toast.LENGTH_SHORT).show();
 
         filedescriptor = null;
         inputstream = null;

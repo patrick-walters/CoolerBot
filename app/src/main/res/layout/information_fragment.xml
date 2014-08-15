@@ -47,72 +47,76 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:max="127"
-        android:progress="65"/>
+        android:max="254"
+        android:progress="127"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Manual"
-        android:id="@+id/modeSelectButton"
+        android:text="Running Manually"
+        android:id="@+id/manualButton"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Start"
-        android:id="@+id/stopSelectButton"
+        android:id="@+id/enableButton"
         android:background="@android:color/holo_green_dark"
-        android:layout_marginTop="25dp"
-        android:layout_below="@+id/modeSelectButton"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Bearing:"
-        android:id="@+id/bearing"
-        android:layout_marginTop="50dp"
-        android:layout_below="@+id/stopSelectButton"
+        android:layout_marginTop="120dp"
+        android:layout_below="@+id/turnSeekBar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waypoint Bearing:"
-        android:id="@+id/wpBearing"
-        android:layout_below="@+id/bearing"
+        android:text="Desired Bearing:"
+        android:id="@+id/desiredBearing"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/enableButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GPS Accruacy:"
-        android:id="@+id/accruacy"
-        android:layout_below="@+id/wpBearing"
+        android:text="Current Bearing:"
+        android:id="@+id/currentBearing"
+        android:layout_below="@+id/desiredBearing"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Effort:"
         android:id="@+id/effort"
-        android:layout_below="@+id/accruacy"
+        android:layout_below="@+id/currentBearing"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Distance"
+        android:text="Distance:"
         android:id="@+id/waypointDistance"
         android:layout_below="@+id/effort"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Speed:"
+        android:id="@+id/textView"
+        android:layout_marginTop="25dp"
+        android:layout_marginRight="75dp"
+        android:layout_below="@+id/enableButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -121,9 +125,18 @@
         android:ems="5"
         android:imeOptions="actionSend"
         android:id="@+id/setSpeed"
-        android:layout_alignBottom="@+id/wpBearing"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/textView"
+        android:layout_alignLeft="@+id/textView"
+        android:layout_alignStart="@+id/textView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gain:"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/setSpeed"
+        android:layout_alignLeft="@+id/setSpeed"
+        android:layout_alignStart="@+id/setSpeed" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -132,26 +145,12 @@
         android:ems="5"
         android:imeOptions="actionSend"
         android:id="@+id/setGain"
-        android:layout_alignTop="@+id/effort"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/textView2"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignStart="@+id/textView2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed:"
-        android:id="@+id/textView"
-        android:layout_above="@+id/setSpeed"
-        android:layout_alignLeft="@+id/setSpeed"
-        android:layout_alignStart="@+id/setSpeed" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gain:"
-        android:id="@+id/textView2"
-        android:layout_above="@+id/effort"
-        android:layout_alignLeft="@+id/setSpeed"
-        android:layout_alignStart="@+id/setSpeed" />
+
+
 
 </RelativeLayout>

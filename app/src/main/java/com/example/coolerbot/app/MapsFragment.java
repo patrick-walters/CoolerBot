@@ -2,9 +2,11 @@ package com.example.coolerbot.app;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +23,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListener,
@@ -34,7 +35,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     private Marker homeMarker;
     private Marker losMarker;
 
-    private MapUpdateListener mapUpdateListener;
+    private MotionControl motionControl;
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -53,8 +54,9 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        //Register map update listener to pass data back to parent activity
-        mapUpdateListener = (MapUpdateListener) activity;
+
+        //Save local reference to motion control class
+        motionControl = ((MainActivity) activity).motionControl;
     }
 
     @Override
@@ -78,6 +80,18 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
         mMap.setOnMapClickListener(this);
         mMap.setOnMarkerDragListener(this);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        LocationManager locationManager = (LocationManager) getActivity()
+                .getSystemService(Context.LOCATION_SERVICE);
+
+        Criteria criteria = new Criteria();
+        String provider = locationManager.getBestProvider(criteria, true);
+        Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
+        if ( lastKnownLocation != null) {
+            LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(),
+            lastKnownLocation.getLongitude());
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
+        }
 
         //Instantiate polyline to draw lines between waypoints
         PolylineOptions polylineOptions = new PolylineOptions();
@@ -116,7 +130,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
                 .title("Waypoint")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))));
         //Send waypoint back up to parent activity
-        mapUpdateListener.onWaypointUpdate(latLng);
+        motionControl.addWaypoint(latLng);
 
         //Iterate through stored waypoint lists, and create points list for polyline to connect
         //waypoint with line.
@@ -162,10 +176,5 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
                 .draggable(true)
                 .title("LOS")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-    }
-
-    //Interface class for map update callback.
-    public interface MapUpdateListener {
-        public void onWaypointUpdate(LatLng waypoint);
     }
 }

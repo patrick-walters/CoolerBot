@@ -1,26 +1,18 @@
 package com.example.coolerbot.app;
 
 import android.content.Context;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Guidance implements LocationListener{
-
-    private Context context;
-
-    private MotionUpdateListener motionUpdateListener;
+public class Guidance{
 
     private List<LatLng> waypoints = new ArrayList<LatLng>(2);
     private LatLng home;
-    private int index;
+    private int index = 1;
+    private int state = 1;
 
     private double x_current;
     private double y_current;
@@ -29,30 +21,41 @@ public class Guidance implements LocationListener{
 
     private double x_los;
     private double y_los;
-    private double desiredBearing;
 
     private double horizon;
     private double waypointDistance;
 
     private double switchDistance;
-    private int state;
-
+    private double desiredBearing;
     private double psi_last;
 
-    private LocationManager locationManager;
+    private boolean isEnabled = false;
+
     private GuidanceEventListener guidanceEventListener;
 
-    public Guidance(Context context, GuidanceEventListener guidanceEventListener,
-                    MotionUpdateListener motionUpdateListener) {
-        this.context = context;
+    public Guidance(GuidanceEventListener guidanceEventListener) {
         this.guidanceEventListener = guidanceEventListener;
-        this.motionUpdateListener = motionUpdateListener;
 
         switchDistance = 5;
         horizon = 5;
+    }
 
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        guidanceStart();
+    public void onStart() {
+        onStart(1);
+    }
+
+    public void onStart(int waypointNumber) {
+        index = waypointNumber;
+        state = 1;
+        isEnabled = true;
+    }
+
+    public void onResume() {
+        isEnabled = true;
+    }
+
+    public void onStop() {
+        isEnabled = false;
     }
 
     public void addWaypoint(LatLng waypoint) {
@@ -63,22 +66,22 @@ public class Guidance implements LocationListener{
         y_waypoints.add(coordinate[0]);
     }
 
-    public double getWaypointDistance() { return waypointDistance; }
-
-    public void guidanceStart() {
-        index = 1;
-        state = 1;
-
-        guidanceResume();
+    public void setHomeLocation(LatLng home) {
+        this.home = home;
     }
 
-    public void guidanceResume() {
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    public void setCurrentLocation(LatLng location) {
+        if(waypoints.size() < 2 || !isEnabled || home == null) {return;}
+
+        double[] current_coordinate = LatLngHelper.ll2ltp(home,location);
+        x_current = current_coordinate[1];
+        y_current = current_coordinate[0];
+
+        calcDesiredBearing();
     }
 
-    public void guidancePause() {
-        locationManager.removeUpdates(this);
-    }
+    public double getDistanceToNext() { return waypointDistance; }
+    public double getDesiredBearing() { return desiredBearing; }
 
     private void calcLOSPosition () {
         double delta_x = x_waypoints.get(index) - x_waypoints.get(index-1);
@@ -105,7 +108,8 @@ public class Guidance implements LocationListener{
             y_los = y_nearest + horizon*y_unit;
         }
 
-        motionUpdateListener.onLOSUpdate(LatLngHelper.ltp2lla(home,new double[]{y_los,x_los,0}));
+        guidanceEventListener.onLOSWaypointUpdate
+                (LatLngHelper.ltp2lla(home,new double[]{y_los,x_los,0}));
 
     }
 
@@ -117,7 +121,9 @@ public class Guidance implements LocationListener{
 
         if (distance <= switchDistance) {
             index ++;
-            if (index >= waypoints.size()) { index = -1; }
+            if (index >= waypoints.size()) {
+                guidanceEventListener.onGuidanceCompletion();
+            }
         }
     }
 
@@ -181,46 +187,13 @@ public class Guidance implements LocationListener{
 
         desiredBearing += accumulate;
         psi_last = psi_now;
-    }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        if(home == null && location != null) {
-            home = new LatLng(location.getLatitude(),location.getLongitude());
-            motionUpdateListener.onHomeUpdate(home);
-        }
-        if(waypoints.size() < 2) {return;}
-        double[] current_coordinate = LatLngHelper.ll2ltp(home,
-                new LatLng(location.getLatitude(),location.getLongitude()));
-        x_current = current_coordinate[1];
-        y_current = current_coordinate[0];
-
-        calcDesiredBearing();
-
-        guidanceEventListener.onGuidanceUpdate(desiredBearing, location.getAccuracy());
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        Toast.makeText(context, "Enabled provider " + provider, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Toast.makeText(context, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
+        guidanceEventListener.onGuidanceUpdate(desiredBearing);
     }
 
     public interface GuidanceEventListener {
-        public void onGuidanceUpdate(double desiredBearing, double accuracy);
-    }
-
-    public interface MotionUpdateListener {
-        public void onHomeUpdate(LatLng home);
-        public void onLOSUpdate(LatLng los);
+        public void onGuidanceUpdate(double bearing);
+        public void onGuidanceCompletion();
+        public void onLOSWaypointUpdate(LatLng los);
     }
 }

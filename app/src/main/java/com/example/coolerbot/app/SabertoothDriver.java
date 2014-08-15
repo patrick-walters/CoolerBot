@@ -32,8 +32,8 @@ public class SabertoothDriver{
     private UARTInterface uartInterface;
 
     public SabertoothDriver(Context context) {
-        super();
-
+        //super();
+        //TODO: May cause issues
         uartInterface = new UARTInterface(context, null);
         uartInterface.SetConfig(baudRate, dataBits, stopBits, parity, flowControl);
     }

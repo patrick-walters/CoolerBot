@@ -1,7 +1,5 @@
 package com.example.coolerbot.app;
 
-import android.util.Log;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,6 +15,9 @@ public class Controller{
     private double desired;
     private double deltaMax;
     private double actual;
+    private double effort;
+
+    private Timer controllerTimer;
 
     private ControllerEventListener controllerEventListener;
 
@@ -25,30 +26,43 @@ public class Controller{
     public Controller(ControllerEventListener controllerEventListener) {
         this.controllerEventListener = controllerEventListener;
 
-        Timer controllerTimer = new Timer();
-
         kp = 1;
         ki = 0;
         kd = 0;
-
         deltaMax = 0.0025;
-        actual = 500;
-
-        controllerTimer.scheduleAtFixedRate(new ControlTask(), 1000, TIME_CONSTANT);
     }
+
+    public void onStart() {
+        controllerTimer = new Timer();
+        controllerTimer.scheduleAtFixedRate(new ControlTask(), 0, TIME_CONSTANT);
+    }
+
+    public void onStop() {
+        if (controllerTimer != null) {
+            controllerTimer.cancel();
+        }
+        effort = 0;
+        integral = 0;
+    }
+
 
     public void setGains(double kp, double ki, double kd) {
         this.kp = kp;
         this.ki = ki;
         this.kd = kd;
-        Log.d("kp",Double.toString(kp));
     }
 
     public void setDesired(double desired) {
         desiredSetpoint = desired;
     }
 
-    public void setActual(double actual) { this.actual = actual; }
+    public void setActual(double actual) {
+        this.actual = actual;
+    }
+
+    public double getEffort() {
+        return effort;
+    }
 
     private double remapAngle(double angle) {
         double n;
@@ -70,8 +84,6 @@ public class Controller{
     }
 
     private void updateControl() {
-        if (actual < -Math.PI || actual > Math.PI) { return; }
-
         double deltaSign = Math.signum(desiredSetpoint - desired);
         double deltaMag = Math.abs(desiredSetpoint - desired);
 
@@ -79,20 +91,17 @@ public class Controller{
             desired += deltaSign*deltaMax;
         }
 
-        double error = remapAngle(desired) - actual;
+        double error = Math.toDegrees(remapAngle(desired) - actual);
 
         if (error > Math.PI) { error -= 2*Math.PI; }
         else if (error < -Math.PI) { error += 2*Math.PI; }
 
         integral += ki*error*(1/TIME_CONSTANT);
 
-        controllerEventListener.onControllerUpdate(Math.toDegrees(kp*error + integral));
-    }
+        effort = kp*error + integral;
 
-    //@Override
-    //public void onEstimatorUpdate(float[] fusedData) {
-    //    actual = fusedData[0];
-    //}
+        controllerEventListener.onControllerUpdate(effort);
+    }
 
     private class ControlTask extends TimerTask {
         @Override
