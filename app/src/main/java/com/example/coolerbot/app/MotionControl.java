@@ -212,8 +212,6 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
     @Override
     public void onLocationChanged(Location location) {
         if(location != null) {
-            Log.d("Location","Not Null");
-            Log.d("Home Set",Boolean.toString(isHomeSet));
             LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
             if (!isHomeSet) {
                 motionControlEventListener.onHomeWaypointUpdate(latLng);

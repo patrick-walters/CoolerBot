@@ -1,7 +1,5 @@
 package com.example.coolerbot.app;
 
-import android.content.Context;
-
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -78,6 +76,7 @@ public class Guidance{
     }
 
     public double getDistanceToNext() {
+        if ((waypoints.size() - 1) < index) { return 0; }
         return Math.sqrt(Math.pow(x_waypoints.get(index)-x_current,2)
                 + Math.pow(y_waypoints.get(index)-y_current,2));
     }
