@@ -168,7 +168,6 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
         sabertoothDriver.setLeftMixed((byte) 0);
     }
 
-
     @Override
     public void onControllerUpdate(double effort) {
         //Callback from controller class. Called when controller updates. Sets turn value to motors.

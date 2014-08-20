@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -98,8 +97,6 @@ public class InformationFragment extends Fragment implements View.OnClickListene
                     //Stop guidance and controller
                     motionControl.stopMission();
                 }
-                Log.d("Override",Boolean.toString(motionControl.isMissionRunning()));
-                Log.d("Prev Override",Boolean.toString(previousMissionState));
                 break;
             case R.id.enableButton:
                 if(!motionControl.isEnabled()) {
@@ -111,8 +108,6 @@ public class InformationFragment extends Fragment implements View.OnClickListene
                     //Disarm robot in motion control
                     motionControl.disable();
                 }
-                Log.d("Enable",Boolean.toString(motionControl.isEnabled()));
-                Log.d("Prev Enable",Boolean.toString(previousEnableState));
                 break;
         }
     }

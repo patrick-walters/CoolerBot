@@ -111,7 +111,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Speed:"
-        android:id="@+id/textView"
+        android:id="@+id/textSpeed"
         android:layout_marginTop="25dp"
         android:layout_marginRight="75dp"
         android:layout_below="@+id/enableButton"
@@ -125,15 +125,15 @@
         android:ems="5"
         android:imeOptions="actionSend"
         android:id="@+id/setSpeed"
-        android:layout_below="@+id/textView"
-        android:layout_alignLeft="@+id/textView"
-        android:layout_alignStart="@+id/textView" />
+        android:layout_below="@+id/textSpeed"
+        android:layout_alignLeft="@+id/textSpeed"
+        android:layout_alignStart="@+id/textSpeed" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Gain:"
-        android:id="@+id/textView2"
+        android:id="@+id/textGain"
         android:layout_below="@+id/setSpeed"
         android:layout_alignLeft="@+id/setSpeed"
         android:layout_alignStart="@+id/setSpeed" />
@@ -145,12 +145,17 @@
         android:ems="5"
         android:imeOptions="actionSend"
         android:id="@+id/setGain"
-        android:layout_below="@+id/textView2"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_alignStart="@+id/textView2"/>
+        android:layout_below="@+id/textGain"
+        android:layout_alignLeft="@+id/textGain"
+        android:layout_alignStart="@+id/textGain"/>
 
-
-
-
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Remote:"
+        android:id="@+id/remote"
+        android:layout_alignBottom="@+id/setGain"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

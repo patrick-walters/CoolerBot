@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -16,6 +19,10 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Locale;
 
+/**
+ * Main class handle high-level UI tasks (e.g. tab switching), creates and holds motion control
+ * instance, initiates network functionality.
+ */
 public class MainActivity extends Activity implements ActionBar.TabListener,
         MotionControl.MotionControlEventListener {
 
@@ -25,8 +32,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
     private MapsFragment mapFragmentInstance;
     private InformationFragment informationFragmentInstance;
+    private ConnectionFragment connectionFragmentInstance;
 
     public MotionControl motionControl;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,11 +115,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.connection:
+                mViewPager.setCurrentItem(2);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -143,13 +155,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
                 case 1:
                     informationFragmentInstance = InformationFragment.newInstance(position + 1);
                     return informationFragmentInstance;
+                case 2:
+                    connectionFragmentInstance = ConnectionFragment.newInstance(position + 1);
+                    return connectionFragmentInstance;
             }
             return null;
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -160,6 +175,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
                     return getString(R.string.title_section1).toUpperCase(l);
                 case 1:
                     return getString(R.string.title_section2).toUpperCase(l);
+                case 2:
+                    return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
         }
