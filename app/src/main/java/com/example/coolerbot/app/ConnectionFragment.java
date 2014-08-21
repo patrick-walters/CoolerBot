@@ -22,9 +22,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +45,9 @@ public class ConnectionFragment extends ListFragment implements WifiP2pManager.P
 
     private RemoteBroadcastReceiver receiver;
     private boolean isWifiP2pEnabled;
+
+    OnRemoteChangeEventListener onRemoteChangeEventListener;
+    private boolean isRemote;
 
     //Intent filter used to receive intents from the android OS for the WIFI connections
     private final IntentFilter intentFilter = new IntentFilter();
@@ -92,6 +98,20 @@ public class ConnectionFragment extends ListFragment implements WifiP2pManager.P
         discoverDevices.setOnClickListener(this);
         Button enableWifi = (Button) rootView.findViewById(R.id.enableWifi);
         enableWifi.setOnClickListener(this);
+
+        Switch remoteSwitch = (Switch) rootView.findViewById(R.id.remoteControl);
+        remoteSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    onRemoteChangeEventListener.onRemoteChange(true);
+                }
+                else {
+                    onRemoteChangeEventListener.onRemoteChange(false);
+                }
+            }
+        });
+
+        onRemoteChangeEventListener = (OnRemoteChangeEventListener) context;
 
         return rootView;
     }
@@ -296,6 +316,10 @@ public class ConnectionFragment extends ListFragment implements WifiP2pManager.P
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
 
+    public boolean getIsRemote() {
+        return isRemote;
+    }
+
     public static class ServerAsyncTask extends AsyncTask<Void,Void,Void> {
 
         public ServerAsyncTask() {}
@@ -305,5 +329,9 @@ public class ConnectionFragment extends ListFragment implements WifiP2pManager.P
 
             return null;
         }
+    }
+
+    public interface OnRemoteChangeEventListener {
+        public void onRemoteChange(boolean isRemote);
     }
 }

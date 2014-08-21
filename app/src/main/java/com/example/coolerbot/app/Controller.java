@@ -90,6 +90,9 @@ public class Controller{
         if (deltaMag >= deltaMax) {
             desired += deltaSign*deltaMax;
         }
+        else {
+            desired = desiredSetpoint;
+        }
 
         double error = Math.toDegrees(remapAngle(desired) - actual);
 

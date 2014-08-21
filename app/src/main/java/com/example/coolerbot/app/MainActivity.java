@@ -24,7 +24,7 @@ import java.util.Locale;
  * instance, initiates network functionality.
  */
 public class MainActivity extends Activity implements ActionBar.TabListener,
-        MotionControl.MotionControlEventListener {
+        MotionControl.MotionControlEventListener, ConnectionFragment.OnRemoteChangeEventListener{
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -34,9 +34,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
     private InformationFragment informationFragmentInstance;
     private ConnectionFragment connectionFragmentInstance;
 
+    private boolean isRemote = false;
+
     public MotionControl motionControl;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        // Create the adapter that will return a fragment for each of the two
+        // Create the adapter that will return a fragment for each of the four
         // primary sections of the activity.
         fragmentManager = getFragmentManager();
         mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
@@ -72,7 +72,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
             }
         });
 
-        // For each of the sections in the app, add a tab to the action bar.
+        // For each sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
@@ -117,6 +117,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.connection:
+                //Go to connection tab that is not showing
                 mViewPager.setCurrentItem(2);
                 return true;
             default:
@@ -137,6 +138,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+    @Override
+    public void onRemoteChange(boolean isRemote) {
+        this.isRemote = isRemote;
     }
 
     //Returns a fragment corresponding to one of the sections/tabs/pages.

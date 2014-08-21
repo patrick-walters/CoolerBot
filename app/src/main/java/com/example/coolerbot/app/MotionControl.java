@@ -6,7 +6,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -26,8 +25,11 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
     private boolean enabled = false;
     private boolean missionRunning = false;
 
-    private byte missionSpeed = 90;
+    private byte currentDesiredSpeed;
+    private byte desiredSpeedSetpoint = 90;
     private boolean isHomeSet = false;
+
+    private static final double DELTA_MAX = 2;
 
     MotionControl(Activity activity) {
         context = activity;
@@ -113,11 +115,11 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
         if (speed <= 0) {
             speed = Math.abs(speed);
             if (speed >= 127) { speed = 127; }
-            sabertoothDriver.setForwardMixed((byte) speed);
+            sabertoothDriver.setBackwardMixed((byte) speed);
         }
         else {
             if (speed >= 127) { speed = 127; }
-            sabertoothDriver.setBackwardMixed((byte) speed);
+            sabertoothDriver.setForwardMixed((byte) speed);
         }
         if (turn <= 0) {
             turn = Math.abs(speed);
@@ -141,8 +143,8 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
         controller.setGains(kp, ki, kd);
     }
 
-    public void setMissionSpeed(byte speed) {
-        missionSpeed = speed;
+    public void setDesiredSpeedSetpoint(byte speed) {
+        desiredSpeedSetpoint = speed;
     }
 
     public boolean isEnabled() { return enabled; }
@@ -163,7 +165,9 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
     public double getControlEffort() {
         return controller.getEffort();
     }
+
     private void allStop() {
+        currentDesiredSpeed = 0;
         sabertoothDriver.setForwardMixed((byte) 0);
         sabertoothDriver.setLeftMixed((byte) 0);
     }
@@ -173,7 +177,18 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
         //Callback from controller class. Called when controller updates. Sets turn value to motors.
         //Left and right turn range from 0-127, but clamped to 0-65, so no one gets knee caped by
         //bot.
-        sabertoothDriver.setForwardMixed(missionSpeed);
+
+        double deltaSign = Math.signum(desiredSpeedSetpoint - currentDesiredSpeed);
+        double deltaMag = Math.abs(desiredSpeedSetpoint - currentDesiredSpeed);
+
+        if (deltaMag >= DELTA_MAX) {
+            currentDesiredSpeed += deltaSign*DELTA_MAX;
+        }
+        else {
+            currentDesiredSpeed = desiredSpeedSetpoint;
+        }
+
+        sabertoothDriver.setForwardMixed(currentDesiredSpeed);
 
         if (effort <= 0) {
             effort = Math.abs(effort);

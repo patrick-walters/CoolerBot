@@ -26,6 +26,20 @@
 
         </LinearLayout>
 
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Remote Control Mode:"
+        android:id="@+id/remoteControl"
+        android:padding="25dp"
+        android:layout_gravity="center_horizontal"
+        android:onClick="onToggleClicked"/>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="@android:color/holo_blue_bright"/>
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"

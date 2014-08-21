@@ -136,7 +136,7 @@ public class InformationFragment extends Fragment implements View.OnClickListene
                             (Integer.parseInt(textView.getText().toString()), 0, 0);
                     break;
                 case R.id.setSpeed:
-                    motionControl.setMissionSpeed
+                    motionControl.setDesiredSpeedSetpoint
                             ((byte) Integer.parseInt(textView.getText().toString()));
                     break;
             }
