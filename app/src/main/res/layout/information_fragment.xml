@@ -1,152 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="20px"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     tools:context=".MainActivity$Information">
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
         android:text="Speed:"
-        android:id="@+id/speed"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:id="@+id/speed" />
 
-    <SeekBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/speedSeekBar"
-        android:layout_marginTop="25dp"
-        android:layout_below="@+id/speed"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:max="127"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1">
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/speedSeekBar"
+            android:max="127"/>
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
         android:text="Turn:"
-        android:id="@+id/turn"
-        android:layout_marginTop="25dp"
-        android:layout_below="@+id/speedSeekBar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:id="@+id/turn"/>
 
-    <SeekBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/turnSeekBar"
-        android:layout_below="@+id/turn"
-        android:layout_marginTop="25dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:max="254"
-        android:progress="127"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1">
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/turnSeekBar"
+            android:max="254"
+            android:progress="127"/>
+    </LinearLayout>
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0.9"
         android:text="Running Manually"
-        android:id="@+id/manualButton"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:id="@+id/manualButton" />
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0.9"
         android:text="Start"
         android:id="@+id/enableButton"
-        android:background="@android:color/holo_green_dark"
-        android:layout_marginTop="120dp"
-        android:layout_below="@+id/turnSeekBar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:background="@android:color/holo_green_dark"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Desired Bearing:"
-        android:id="@+id/desiredBearing"
-        android:layout_marginTop="25dp"
-        android:layout_below="@+id/enableButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0.8">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Bearing:"
-        android:id="@+id/currentBearing"
-        android:layout_below="@+id/desiredBearing"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Desired Bearing:"
+                android:id="@+id/desiredBearing"
+                android:layout_marginTop="25dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Current Bearing:"
+                android:id="@+id/currentBearing"/>
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Effort:"
-        android:id="@+id/effort"
-        android:layout_below="@+id/currentBearing"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Effort:"
+                android:id="@+id/effort"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Distance:"
-        android:id="@+id/waypointDistance"
-        android:layout_below="@+id/effort"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Distance:"
+                android:id="@+id/waypointDistance"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed:"
-        android:id="@+id/textSpeed"
-        android:layout_marginTop="25dp"
-        android:layout_marginRight="75dp"
-        android:layout_below="@+id/enableButton"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        </LinearLayout>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="5"
-        android:imeOptions="actionSend"
-        android:id="@+id/setSpeed"
-        android:layout_below="@+id/textSpeed"
-        android:layout_alignLeft="@+id/textSpeed"
-        android:layout_alignStart="@+id/textSpeed" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="2">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Speed:"
+                android:id="@+id/textSpeed"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gain:"
-        android:id="@+id/textGain"
-        android:layout_below="@+id/setSpeed"
-        android:layout_alignLeft="@+id/setSpeed"
-        android:layout_alignStart="@+id/setSpeed" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="5"
+                android:imeOptions="actionSend"
+                android:id="@+id/setSpeed"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="5"
-        android:imeOptions="actionSend"
-        android:id="@+id/setGain"
-        android:layout_below="@+id/textGain"
-        android:layout_alignLeft="@+id/textGain"
-        android:layout_alignStart="@+id/textGain"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gain:"
+                android:id="@+id/textGain" />
 
-</RelativeLayout>
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="5"
+                android:imeOptions="actionSend"
+                android:id="@+id/setGain"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
