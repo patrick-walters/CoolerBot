@@ -49,7 +49,7 @@ public class RemoteBroadcastReceiver extends BroadcastReceiver{
                 return;
             }
 
-            NetworkInfo networkInfo = intent .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+            NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
 
             if (networkInfo.isConnected()) {
                 // We are connected with the other device, request connection
