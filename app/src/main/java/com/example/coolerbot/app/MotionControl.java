@@ -2,10 +2,12 @@ package com.example.coolerbot.app;
 
 import android.app.Activity;
 import android.content.Context;
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -122,7 +124,7 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
             sabertoothDriver.setForwardMixed((byte) speed);
         }
         if (turn <= 0) {
-            turn = Math.abs(speed);
+            turn = Math.abs(turn);
             if (turn >= 127) { turn = 127; }
             sabertoothDriver.setLeftMixed((byte) turn);
         }
