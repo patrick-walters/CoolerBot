@@ -32,8 +32,7 @@
         android:text="Remote Control Mode:"
         android:id="@+id/remoteControl"
         android:padding="25dp"
-        android:layout_gravity="center_horizontal"
-        android:onClick="onToggleClicked"/>
+        android:layout_gravity="center_horizontal" h/>
 
     <View
         android:layout_width="fill_parent"
