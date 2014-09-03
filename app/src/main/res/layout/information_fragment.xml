@@ -54,7 +54,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="0.9"
-        android:text="Start"
+        android:text="Anup's Big Ass Start Button"
         android:id="@+id/enableButton"
         android:background="@android:color/holo_green_dark"/>
 

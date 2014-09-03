@@ -46,7 +46,6 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
         motionControlEventListener = (MotionControlEventListener) context;
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
     }
 
     public void onResume() {
