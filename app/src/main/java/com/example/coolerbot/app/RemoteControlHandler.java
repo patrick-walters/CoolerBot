@@ -84,38 +84,31 @@ public class RemoteControlHandler {
     }
     public boolean isMissionRunning() {
         if (!isRemote) {
-            return isMissionRunning()
+            return isMissionRunning();
         }
-        return missionRunning;
     }
 
     public double getDesiredBearing() {
         if (!isRemote) {
-
+            return motionControl.getDesiredBearing();
         }
     }
 
     public double getDistanceToNext() {
         if (!isRemote) {
-
+            return motionControl.getDistanceToNext();
         }
     }
 
     public double getActualBearing() {
         if (!isRemote) {
-
+            return motionControl.getActualBearing();
         }
     }
 
     public double getControlEffort() {
         if (!isRemote) {
-
-        }
-    }
-
-    private void allStop() {
-        if (!isRemote) {
-
+            return motionControl.getControlEffort();
         }
     }
 }
