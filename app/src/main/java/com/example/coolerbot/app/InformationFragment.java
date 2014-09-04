@@ -29,7 +29,7 @@ public class InformationFragment extends Fragment implements View.OnClickListene
     private SeekBar speedSeekBar;
     private SeekBar turnSeekBar;
 
-    private MotionControl motionControl;
+    private RemoteControlHandler remoteControlHandler;
 
     private boolean previousEnableState;
     private boolean previousMissionState;
@@ -51,7 +51,7 @@ public class InformationFragment extends Fragment implements View.OnClickListene
         super.onAttach(activity);
 
         //Save local reference to motion control class
-        motionControl = ((MainActivity) activity).motionControl;
+        remoteControlHandler = ((MainActivity) activity).remoteControlHandler;
     }
 
     @Override
@@ -60,8 +60,8 @@ public class InformationFragment extends Fragment implements View.OnClickListene
         //Inflate information layout
         View rootView = inflater.inflate(R.layout.information_fragment, container, false);
 
-        previousEnableState = motionControl.isEnabled();
-        previousMissionState = motionControl.isMissionRunning();
+        previousEnableState = remoteControlHandler.isEnabled();
+        previousMissionState = remoteControlHandler.isMissionRunning();
 
         //Register all button, seek bar, and text edit callbacks from information layout
         Button enableButton = (Button) rootView.findViewById(R.id.enableButton);
@@ -88,25 +88,25 @@ public class InformationFragment extends Fragment implements View.OnClickListene
         switch (view.getId()) {
             case R.id.manualButton:
                 //Toggle manual/automatic mode
-                if(!motionControl.isMissionRunning()) {
+                if(!remoteControlHandler.isMissionRunning()) {
                     //Startup guidance and controller
-                    motionControl.startMission();
+                    remoteControlHandler.startMission();
                 }
                 //Just for you, Anup
                 else {
                     //Stop guidance and controller
-                    motionControl.stopMission();
+                    remoteControlHandler.stopMission();
                 }
                 break;
             case R.id.enableButton:
-                if(!motionControl.isEnabled()) {
+                if(!remoteControlHandler.isEnabled()) {
                     //Arm robot in motion control
-                    motionControl.enable();
+                    remoteControlHandler.enable();
                 }
                 //Just for you, Anup
                 else {
                     //Disarm robot in motion control
-                    motionControl.disable();
+                    remoteControlHandler.disable();
                 }
                 break;
         }
@@ -116,7 +116,7 @@ public class InformationFragment extends Fragment implements View.OnClickListene
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         //Update speed and turn on motor drive when either seek bar is changed. Currently only goes
         //forward in this view. The minus 127 on turn is because there is no negative value.
-        motionControl.setManualControl(speedSeekBar.getProgress(),turnSeekBar.getProgress() - 127);
+        remoteControlHandler.setManualControl(speedSeekBar.getProgress(), turnSeekBar.getProgress() - 127);
     }
 
     @Override
@@ -132,11 +132,11 @@ public class InformationFragment extends Fragment implements View.OnClickListene
         if (actionId == EditorInfo.IME_ACTION_SEND) {
             switch (textView.getId()) {
                 case R.id.setGain:
-                    motionControl.setControllerGains
+                    remoteControlHandler.setControllerGains
                             (Integer.parseInt(textView.getText().toString()), 0, 0);
                     break;
                 case R.id.setSpeed:
-                    motionControl.setDesiredSpeedSetpoint
+                    remoteControlHandler.setDesiredSpeedSetpoint
                             ((byte) Integer.parseInt(textView.getText().toString()));
                     break;
             }
@@ -162,7 +162,7 @@ public class InformationFragment extends Fragment implements View.OnClickListene
     private Runnable updateDisplay = new Runnable() {
         public void run() {
             if ( getView() != null ) {
-                if(motionControl.isMissionRunning() && !previousMissionState) {
+                if(remoteControlHandler.isMissionRunning() && !previousMissionState) {
                     ((Button) getView().findViewById(R.id.manualButton))
                             .setText("Running Automatically");
 
@@ -170,9 +170,9 @@ public class InformationFragment extends Fragment implements View.OnClickListene
                     speedSeekBar.setEnabled(false);
                     turnSeekBar.setEnabled(false);
 
-                    previousMissionState = motionControl.isMissionRunning();
+                    previousMissionState = remoteControlHandler.isMissionRunning();
                 }
-                else if (!motionControl.isMissionRunning() && previousMissionState){
+                else if (!remoteControlHandler.isMissionRunning() && previousMissionState){
                     ((Button) getView().findViewById(R.id.manualButton))
                             .setText("Running Manually");
 
@@ -183,38 +183,38 @@ public class InformationFragment extends Fragment implements View.OnClickListene
                     speedSeekBar.setEnabled(true);
                     turnSeekBar.setEnabled(true);
 
-                    previousMissionState = motionControl.isMissionRunning();
+                    previousMissionState = remoteControlHandler.isMissionRunning();
                 }
-                if(motionControl.isEnabled() && !previousEnableState) {
+                if(remoteControlHandler.isEnabled() && !previousEnableState) {
                     ((Button) getView().findViewById(R.id.enableButton)).setText("Stop");
                     getView().findViewById(R.id.enableButton).setBackgroundColor(0xffcc0000);
 
-                    previousEnableState = motionControl.isEnabled();
+                    previousEnableState = remoteControlHandler.isEnabled();
                 }
-                else if (!motionControl.isEnabled() && previousEnableState){
+                else if (!remoteControlHandler.isEnabled() && previousEnableState){
                     ((Button) getView().findViewById(R.id.enableButton)).setText("Start");
                     getView().findViewById(R.id.enableButton).setBackgroundColor(0xff669900);
 
                     //Coming into stopped state, reset progress and motor commands.
                     resetProgress();
 
-                    previousEnableState = motionControl.isEnabled();
+                    previousEnableState = remoteControlHandler.isEnabled();
                 }
 
 
                 TextView desiredBearing = (TextView) getView().findViewById(R.id.desiredBearing);
                 desiredBearing.setText("Waypoint Bearing: "
-                        + (float) (Math.toDegrees(motionControl.getDesiredBearing())));
+                        + (float) (Math.toDegrees(remoteControlHandler.getDesiredBearing())));
 
                 TextView actualBearing = (TextView) getView().findViewById(R.id.currentBearing);
                 actualBearing.setText("Current Bearing: "
-                        + (float) (Math.toDegrees(motionControl.getActualBearing())));
+                        + (float) (Math.toDegrees(remoteControlHandler.getActualBearing())));
 
                 TextView control = (TextView) getView().findViewById(R.id.effort);
-                control.setText("Effort: " + (float) motionControl.getControlEffort());
+                control.setText("Effort: " + (float) remoteControlHandler.getControlEffort());
 
                 TextView waypoint = (TextView) getView().findViewById(R.id.waypointDistance);
-                waypoint.setText("Distance: " + (float) motionControl.getDistanceToNext());
+                waypoint.setText("Distance: " + (float) remoteControlHandler.getDistanceToNext());
 
             }
         }

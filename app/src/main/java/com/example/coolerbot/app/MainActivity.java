@@ -5,9 +5,6 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -24,7 +21,7 @@ import java.util.Locale;
  * instance, initiates network functionality.
  */
 public class MainActivity extends Activity implements ActionBar.TabListener,
-        MotionControl.MotionControlEventListener, ConnectionFragment.OnRemoteChangeEventListener{
+        RemoteControlHandler.RemoteControlEventListener, ConnectionFragment.OnRemoteChangeEventListener{
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -36,7 +33,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
     private boolean isRemote = false;
 
-    public MotionControl motionControl;
+    public RemoteControlHandler remoteControlHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +44,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //Instantiate motion control class
-        motionControl = new MotionControl(this);
+        remoteControlHandler = new RemoteControlHandler(this);
 
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
@@ -88,18 +85,18 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
     @Override
     public void onResume() {
         super.onResume();
-        motionControl.onResume();
+        remoteControlHandler.onResume();
     }
 
     @Override
     public void onPause() {
-        motionControl.onPause();
+        remoteControlHandler.onPause();
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        motionControl.onDestroy();
+        remoteControlHandler.onDestroy();
         super.onDestroy();
     }
 

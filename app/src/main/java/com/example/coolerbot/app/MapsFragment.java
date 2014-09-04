@@ -56,7 +56,7 @@ public class MapsFragment extends Fragment implements GoogleMap.OnMapClickListen
         super.onAttach(activity);
 
         //Save local reference to motion control class
-        motionControl = ((MainActivity) activity).motionControl;
+        motionControl = ((MainActivity) activity).remoteControlHandler;
     }
 
     @Override

@@ -33,7 +33,7 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
 
     private static final double DELTA_MAX = 2;
 
-    MotionControl(Activity activity) {
+    MotionControl(Activity activity, RemoteControlHandler remoteControlHandler) {
         context = activity;
 
         //Instantiate motor driver, estimator, controller, and guidance classes when fragment is
@@ -43,7 +43,7 @@ public class MotionControl implements Estimator.EstimatorEventListener, Guidance
         controller = new Controller(this);
         guidance = new Guidance(this);
 
-        motionControlEventListener = (MotionControlEventListener) context;
+        motionControlEventListener = (MotionControlEventListener) remoteControlHandler;
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }

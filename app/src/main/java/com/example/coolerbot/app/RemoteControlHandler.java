@@ -4,13 +4,33 @@ import android.app.Activity;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class RemoteControlHandler {
+public class RemoteControlHandler implements MotionControl.MotionControlEventListener {
 
     private MotionControl motionControl;
     private boolean isRemote;
+    private RemoteControlEventListener remoteControlEventListener;
 
-    RemoteControlHandler(MotionControl motionControl) {
-        this.motionControl = motionControl;
+    RemoteControlHandler(Activity activity) {
+        this.motionControl = new MotionControl(activity, this);
+        remoteControlEventListener = (RemoteControlEventListener) activity;
+    }
+
+    public void onResume() {
+        if (!isRemote) {
+            motionControl.onResume();
+        }
+    }
+
+    public void onPause() {
+        if (!isRemote) {
+            motionControl.onPause();
+        }
+    }
+
+    public void onDestroy() {
+        if (!isRemote) {
+            motionControl.onDestroy();
+        }
     }
 
     public void enable() {
@@ -84,7 +104,7 @@ public class RemoteControlHandler {
     }
     public boolean isMissionRunning() {
         if (!isRemote) {
-            return isMissionRunning();
+            return motionControl.isMissionRunning();
         }
     }
 
@@ -110,5 +130,20 @@ public class RemoteControlHandler {
         if (!isRemote) {
             return motionControl.getControlEffort();
         }
+    }
+
+    @Override
+    public void onHomeWaypointUpdate(LatLng home) {
+        remoteControlEventListener.onHomeWaypointUpdate(home);
+    }
+
+    @Override
+    public void onLOSWaypointUpdate(LatLng los) {
+        remoteControlEventListener.onLOSWaypointUpdate(los);
+    }
+
+    public interface RemoteControlEventListener {
+        public void onHomeWaypointUpdate(LatLng home);
+        public void onLOSWaypointUpdate(LatLng los);
     }
 }
