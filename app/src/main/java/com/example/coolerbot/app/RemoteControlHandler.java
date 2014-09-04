@@ -7,7 +7,7 @@ import com.google.android.gms.maps.model.LatLng;
 public class RemoteControlHandler implements MotionControl.MotionControlEventListener {
 
     private MotionControl motionControl;
-    private boolean isRemote;
+    private boolean isRemote = false;
     private RemoteControlEventListener remoteControlEventListener;
 
     RemoteControlHandler(Activity activity) {
@@ -47,16 +47,16 @@ public class RemoteControlHandler implements MotionControl.MotionControlEventLis
 
     public boolean startMission() {
         if (!isRemote) {
-            motionControl.startMission();
+            return motionControl.startMission();
         }
-        return true;
+        return false;
     }
 
     public boolean resumeMission() {
         if (!isRemote) {
-            motionControl.resumeMission();
+            return motionControl.resumeMission();
         }
-        return true;
+        return false;
     }
 
     public void pauseMission() {
@@ -101,35 +101,41 @@ public class RemoteControlHandler implements MotionControl.MotionControlEventLis
         if (!isRemote) {
             return motionControl.isEnabled();
         }
+        return false;
     }
     public boolean isMissionRunning() {
         if (!isRemote) {
             return motionControl.isMissionRunning();
         }
+        return false;
     }
 
     public double getDesiredBearing() {
         if (!isRemote) {
             return motionControl.getDesiredBearing();
         }
+        return 0;
     }
 
     public double getDistanceToNext() {
         if (!isRemote) {
             return motionControl.getDistanceToNext();
         }
+        return 0;
     }
 
     public double getActualBearing() {
         if (!isRemote) {
             return motionControl.getActualBearing();
         }
+        return 0;
     }
 
     public double getControlEffort() {
         if (!isRemote) {
             return motionControl.getControlEffort();
         }
+        return 0;
     }
 
     @Override
